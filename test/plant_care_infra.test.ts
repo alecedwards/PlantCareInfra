@@ -1,17 +1,26 @@
-// import * as cdk from 'aws-cdk-lib';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as PlantCareInfra from '../lib/plant_care_infra-stack';
+import * as cdk from 'aws-cdk-lib';
+import { Template, Match } from 'aws-cdk-lib/assertions';
+import * as PlantCareInfra from '../lib/plant_care_infra-stack';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/plant_care_infra-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new PlantCareInfra.PlantCareInfraStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+function synth(): Template {
+  const app = new cdk.App();
+  const stack = new PlantCareInfra.PlantCareInfraStack(app, 'MyTestStack');
+  return Template.fromStack(stack);
+}
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+test('creates a Rust lambda on the provided.al2023 runtime', () => {
+  const template = synth();
+
+  template.hasResourceProperties('AWS::Lambda::Function', {
+    Runtime: 'provided.al2023',
+    Handler: Match.anyValue(),
+  });
+});
+
+test('exposes the function through a public Function URL', () => {
+  const template = synth();
+
+  template.hasResourceProperties('AWS::Lambda::Url', {
+    AuthType: 'NONE',
+  });
 });
